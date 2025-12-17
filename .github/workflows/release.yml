@@ -29,6 +29,10 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         shell: bash
         run: |
+          if [[ "${GITHUB_REF}" != refs/tags/v* ]]; then
+            echo "Not a v* tag run (${GITHUB_REF}); skipping version check."
+            exit 0
+          fi
           node -e "const fs=require('fs'); const pkg=JSON.parse(fs.readFileSync('package.json','utf8')); const tag=process.env.GITHUB_REF_NAME; const expected='v'+pkg.version; if(tag!==expected){ console.error('Tag mismatch:', tag, '!=', expected); process.exit(1);} console.log('Tag matches version:', expected);"
 
       - name: Test
