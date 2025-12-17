@@ -1,0 +1,43 @@
+name: Bug report
+description: Report a reproducible bug
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Provide minimal, ordered steps.
+      placeholder: |
+        1) Open ...
+        2) Type ...
+        3) Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / screenshots
+      description: Paste logs from DevTools / terminal, or screenshots if relevant.
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: OS + Node + app version
+      placeholder: Windows 11, Node 22.x, Typing Trainer 0.x
+    validations:
+      required: true
+
