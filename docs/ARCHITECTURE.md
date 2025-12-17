@@ -105,7 +105,7 @@ flowchart LR
   Menu[Electron Menu: File→Open] --> MainOpen[electron/main.ts: openFileFromDialog]
   Home[Home.tsx: Open File button] --> PreloadOpen[window.api.openFile]
   PreloadOpen --> MainOpen
-  MainOpen -->|OpenFileResult {filePath,fileName,content,encoding}| Renderer[Renderer: App.tsx]
+  MainOpen -->|"OpenFileResult (filePath, fileName, content, encoding)"| Renderer[Renderer: App.tsx]
   Renderer --> Worker[segmenter.worker.ts]
   Worker -->|segments[] (with commentRanges)| Renderer
   Renderer --> Typing[Typing.tsx]
