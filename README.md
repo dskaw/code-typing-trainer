@@ -1,6 +1,12 @@
 # CodeTyping Trainer
 
-A typing.io-like offline code typing practice app (no telemetry, no network calls).
+[![Release](https://img.shields.io/github/v/release/dskaw/code-typing-trainer?sort=semver)](https://github.com/dskaw/code-typing-trainer/releases)
+[![License](https://img.shields.io/github/license/dskaw/code-typing-trainer)](LICENSE)
+[![Build](https://github.com/dskaw/code-typing-trainer/actions/workflows/release.yml/badge.svg)](https://github.com/dskaw/code-typing-trainer/actions/workflows/release.yml)
+
+Offline code typing trainer (typing.io-like) for touch-typing practice on local files — Electron + Vite + React + TypeScript + Monaco (Mantine UI).
+
+Download: https://github.com/dskaw/code-typing-trainer/releases
 
 Open any local file → split into segments → type with strict rules (slack/lock/backspace) → save attempts locally → view analytics.
 
