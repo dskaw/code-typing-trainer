@@ -1,4 +1,5 @@
-import { Alert, Badge, Button, Card, Container, Group, Stack, Text, TextInput, Title } from '@mantine/core'
+import { Alert, Badge, Button, Card, Container, Divider, Group, Stack, Text, TextInput, Title, Collapse } from '@mantine/core'
+import { notifications } from '@mantine/notifications'
 import { useEffect, useMemo, useState } from 'react'
 import {
   CartesianGrid,
@@ -80,9 +81,19 @@ export function Analytics({ onHome }: AnalyticsProps) {
       }))
   }, [filteredAttempts])
 
+  const copyText = async (label: string, value: string) => {
+    try {
+      await navigator.clipboard.writeText(value)
+      notifications.show({ color: 'green', message: `Copied ${label}` })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      notifications.show({ color: 'red', title: 'Copy failed', message })
+    }
+  }
+
   return (
-    <Container size="lg" py="lg" className="h-full">
-      <Stack gap="md" className="h-full">
+    <Container size="lg" py="lg">
+      <Stack gap="md">
         <Group justify="space-between" align="flex-end" wrap="wrap">
           <Group>
             <Button variant="subtle" onClick={onHome}>Home</Button>
@@ -108,13 +119,13 @@ export function Analytics({ onHome }: AnalyticsProps) {
           </Alert>
         )}
 
-        <div className="grid grid-cols-1 gap-3">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           <Card withBorder padding="md">
             <Group justify="space-between" mb="xs">
               <Text fw={600}>WPM over time</Text>
               {state.status === 'loading' && <Text size="xs" c="dimmed">Loading...</Text>}
             </Group>
-            <div style={{ height: 220 }}>
+            <div style={{ height: 240 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={series} margin={{ top: 10, right: 16, bottom: 8, left: 0 }}>
                   <CartesianGrid strokeDasharray="4 4" />
@@ -134,8 +145,11 @@ export function Analytics({ onHome }: AnalyticsProps) {
           </Card>
 
           <Card withBorder padding="md">
-            <Text fw={600} mb="xs">Unproductive% over time</Text>
-            <div style={{ height: 220 }}>
+            <Group justify="space-between" mb="xs">
+              <Text fw={600}>Unproductive% over time</Text>
+              {state.status === 'loading' && <Text size="xs" c="dimmed">Loading...</Text>}
+            </Group>
+            <div style={{ height: 240 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={series} margin={{ top: 10, right: 16, bottom: 8, left: 0 }}>
                   <CartesianGrid strokeDasharray="4 4" />
@@ -155,9 +169,16 @@ export function Analytics({ onHome }: AnalyticsProps) {
           </Card>
         </div>
 
-        <div className="tt-border min-h-0 overflow-auto border-t pt-3">
-          <Group justify="space-between" mb="xs">
-            <Text fw={600}>Attempts</Text>
+        <Divider />
+
+        <Stack gap="sm">
+          <Group justify="space-between" align="flex-end" wrap="wrap">
+            <div>
+              <Text fw={700}>Attempts</Text>
+              <Text size="sm" c="dimmed">
+                Browse attempts below (page scroll). Use the filter above to narrow by file name.
+              </Text>
+            </div>
             {state.status === 'loading' && <Text size="xs" c="dimmed">Loading...</Text>}
           </Group>
 
@@ -167,55 +188,113 @@ export function Analytics({ onHome }: AnalyticsProps) {
             </Text>
           )}
 
-          <Stack gap="xs">
+          <Stack gap="md">
             {filteredAttempts.map((a) => {
               const expanded = expandedId === a.id
+              const detailsJson = JSON.stringify(a, null, 2)
               return (
-                <Card key={a.id} withBorder padding="sm">
-                  <button
-                    type="button"
-                    onClick={() => setExpandedId(expanded ? null : a.id)}
-                    className="w-full text-left"
-                  >
-                    <Group justify="space-between" align="flex-start" wrap="wrap">
-                      <div>
-                        <Text fw={600}>{a.fileName}</Text>
-                        <Text size="xs" c="dimmed">{formatDateTime(a.endAtMs)}</Text>
-                      </div>
+                <Card
+                  key={a.id}
+                  withBorder
+                  padding="md"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setExpandedId(expanded ? null : a.id)}
+                >
+                  <Group justify="space-between" align="flex-start" wrap="wrap" gap="md">
+                    <div className="min-w-0">
+                      <Group gap="sm" wrap="wrap">
+                        <Text fw={700}>{a.fileName}</Text>
+                        <Badge variant="light">Seg {a.segmentIndex + 1}</Badge>
+                        <Badge variant="light">Lines {a.segmentStartLine}-{a.segmentEndLine}</Badge>
+                        <Badge variant="light">{formatDateTime(a.endAtMs)}</Badge>
+                      </Group>
+                      <Text
+                        size="xs"
+                        c="dimmed"
+                        className="truncate"
+                        title={a.filePath}
+                        mt={6}
+                      >
+                        {a.filePath}
+                      </Text>
+                    </div>
+
+                    <Group gap="md" wrap="wrap" justify="flex-end">
+                      <Text size="sm"><strong>WPM</strong> {a.wpm.toFixed(1)}</Text>
+                      <Text size="sm"><strong>Unprod%</strong> {a.unproductivePercent.toFixed(1)}</Text>
+                      <Text size="sm"><strong>Duration</strong> {(a.durationMs / 1000).toFixed(1)}s</Text>
+                      <Button
+                        size="xs"
+                        variant="light"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setExpandedId(expanded ? null : a.id)
+                        }}
+                      >
+                        {expanded ? 'Hide details' : 'Details'}
+                      </Button>
+                    </Group>
+                  </Group>
+
+                  <Collapse in={expanded}>
+                    <Divider my="sm" />
+                    <Stack gap="xs">
+                      <Group gap="sm" wrap="wrap">
+                        <Button
+                          size="xs"
+                          variant="default"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            void copyText('file path', a.filePath)
+                          }}
+                        >
+                          Copy path
+                        </Button>
+                        <Button
+                          size="xs"
+                          variant="default"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            void copyText('JSON', detailsJson)
+                          }}
+                        >
+                          Copy JSON
+                        </Button>
+                      </Group>
+
+                      <Text size="sm" style={{ overflowWrap: 'anywhere' }}>
+                        <strong>filePath</strong>: <span className="tt-muted">{a.filePath}</span>
+                      </Text>
 
                       <Group gap="md" wrap="wrap">
-                        <Text size="sm"><strong>WPM</strong> {a.wpm.toFixed(1)}</Text>
-                        <Text size="sm"><strong>Unprod%</strong> {a.unproductivePercent.toFixed(1)}</Text>
-                        <Text size="sm"><strong>Seg</strong> {a.segmentIndex + 1}</Text>
-                      </Group>
-                    </Group>
-                  </button>
-
-                      {expanded && (
-                    <Stack gap={4} mt="sm">
-                      <Text size="sm"><strong>filePath</strong>: <span className="tt-muted">{a.filePath}</span></Text>
-                      <Text size="sm"><strong>lines</strong>: {a.segmentStartLine}-{a.segmentEndLine}</Text>
-                      <Text size="sm"><strong>durationMs</strong>: {a.durationMs}</Text>
-                      <Group gap="md" wrap="wrap" mt={4}>
                         <Text size="sm"><strong>typeableChars</strong>: {a.typeableChars}</Text>
                         <Text size="sm"><strong>correctChars</strong>: {a.correctChars}</Text>
                         <Text size="sm"><strong>typedKeystrokes</strong>: {a.typedKeystrokes}</Text>
                       </Group>
-                      <Group gap="md" wrap="wrap" mt={4}>
+                      <Group gap="md" wrap="wrap">
                         <Text size="sm"><strong>incorrect</strong>: {a.incorrect}</Text>
                         <Text size="sm"><strong>collateral</strong>: {a.collateral}</Text>
                         <Text size="sm"><strong>backspaces</strong>: {a.backspaces}</Text>
                       </Group>
-                      <Text size="sm" mt={4}>
+                      <Text size="sm">
                         <strong>settings</strong>: linesPerSegment={a.linesPerSegment}, tabWidth={a.tabWidth}, slackN={a.slackN}
                       </Text>
+
+                      <Text fw={600} size="sm" mt="xs">Raw JSON</Text>
+                      <pre
+                        className="tt-panel tt-border rounded-md border px-3 py-2 text-xs"
+                        style={{ margin: 0, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {detailsJson}
+                      </pre>
                     </Stack>
-                  )}
+                  </Collapse>
                 </Card>
               )
             })}
           </Stack>
-        </div>
+        </Stack>
       </Stack>
     </Container>
   )
