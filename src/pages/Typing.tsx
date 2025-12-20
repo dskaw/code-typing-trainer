@@ -460,11 +460,9 @@ export function Typing({ file, segments, settings, segmentIndex, onBack, onUpdat
 
       const engine = engineRef.current
       setUi(snapshotFromEngine(engine, startAtRef.current))
-
-      applyDecorations()
       maybeComplete()
     })
-  }, [applyDecorations, maybeComplete])
+  }, [maybeComplete])
 
   const resetEngine = useCallback(() => {
     completedRef.current = false
@@ -591,9 +589,11 @@ export function Typing({ file, segments, settings, segmentIndex, onBack, onUpdat
     for (let i = 0; i < text.length; i += 1) {
       handleKey(engineRef.current, text[i])
     }
+    // Apply Monaco decorations synchronously to avoid a 1-frame stale cursor/afterContent "ghost".
+    applyDecorations()
     scheduleCommit()
     perfRef.current.lastKeyHandlingMs = performance.now() - keyStart
-  }, [scheduleCommit, segment])
+  }, [applyDecorations, scheduleCommit, segment])
 
   const handleInput = useCallback((event: React.FormEvent<HTMLTextAreaElement>) => {
     if (isComposingRef.current) return
@@ -670,6 +670,7 @@ export function Typing({ file, segments, settings, segmentIndex, onBack, onUpdat
       perfRef.current.pendingRenderLatency = true
       ensureStarted()
       handleBackspace(engineRef.current)
+      applyDecorations()
       scheduleCommit()
       perfRef.current.lastKeyHandlingMs = performance.now() - keyStart
       return
@@ -682,6 +683,7 @@ export function Typing({ file, segments, settings, segmentIndex, onBack, onUpdat
       perfRef.current.pendingRenderLatency = true
       ensureStarted()
       handleKey(engineRef.current, '\n')
+      applyDecorations()
       scheduleCommit()
       perfRef.current.lastKeyHandlingMs = performance.now() - keyStart
       return
@@ -695,6 +697,7 @@ export function Typing({ file, segments, settings, segmentIndex, onBack, onUpdat
       perfRef.current.pendingRenderLatency = true
       ensureStarted()
       for (let i = 0; i < settings.tabWidth; i += 1) handleKey(engineRef.current, ' ')
+      applyDecorations()
       scheduleCommit()
       perfRef.current.lastKeyHandlingMs = performance.now() - keyStart
       return
@@ -716,6 +719,10 @@ export function Typing({ file, segments, settings, segmentIndex, onBack, onUpdat
   const editorOptions = useMemo<Monaco.editor.IStandaloneEditorConstructionOptions>(() => ({
     readOnly: true,
     domReadOnly: true,
+    // We render our own cursor/position indicator via decorations/content widgets.
+    // Hide Monaco's native cursor to avoid occasional focus-related "ghost" caret rendering.
+    cursorWidth: 0,
+    hideCursorInOverviewRuler: true,
     minimap: { enabled: false },
     scrollBeyondLastLine: false,
     wordWrap: 'off',

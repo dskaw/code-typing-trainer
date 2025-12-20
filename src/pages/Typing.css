@@ -163,3 +163,9 @@
   margin-bottom: 6px;
   opacity: 0.95;
 }
+
+/* Monaco native cursor: we draw our own cursor indicator via decorations. */
+.monaco-editor .cursors-layer .cursor,
+.monaco-editor .cursors-layer .secondary-cursor {
+  display: none !important;
+}
