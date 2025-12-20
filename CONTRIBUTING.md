@@ -1,5 +1,10 @@
 # Contributing
 
+<p align="center">
+  <a href="./CONTRIBUTING.md"><strong>English</strong></a> |
+  <a href="./CONTRIBUTING.zh-CN.md"><strong>简体中文</strong></a>
+</p>
+
 Thanks for your interest in improving CodeTyping Trainer.
 
 ## Quick start

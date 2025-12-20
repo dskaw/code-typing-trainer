@@ -1,5 +1,10 @@
 # CodeTyping Trainer
 
+<p align="center">
+  <a href="./README.md"><strong>English</strong></a> |
+  <a href="./README.zh-CN.md"><strong>简体中文</strong></a>
+</p>
+
 [![Release](https://img.shields.io/github/v/release/dskaw/code-typing-trainer?sort=semver)](https://github.com/dskaw/code-typing-trainer/releases)
 [![License](https://img.shields.io/github/license/dskaw/code-typing-trainer)](LICENSE)
 [![Build](https://github.com/dskaw/code-typing-trainer/actions/workflows/release.yml/badge.svg)](https://github.com/dskaw/code-typing-trainer/actions/workflows/release.yml)
@@ -11,6 +16,10 @@ Download: https://github.com/dskaw/code-typing-trainer/releases
 Open any local file → split into segments → type with strict rules (slack/lock/backspace) → save attempts locally → view analytics.
 
 - Architecture details: `docs/ARCHITECTURE.md`
+- 中文文档 / Chinese docs:
+  - `README.zh-CN.md`
+  - `docs/ARCHITECTURE.zh-CN.md`
+  - `CONTRIBUTING.zh-CN.md`
 
 ---
 

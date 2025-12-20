@@ -1,5 +1,10 @@
 # CodeTyping Trainer — Architecture
 
+<p align="center">
+  <a href="./ARCHITECTURE.md"><strong>English</strong></a> |
+  <a href="./ARCHITECTURE.zh-CN.md"><strong>简体中文</strong></a>
+</p>
+
 CodeTyping Trainer is a local/offline desktop typing practice app for arbitrary text and source code files.
 
 Core flow:
